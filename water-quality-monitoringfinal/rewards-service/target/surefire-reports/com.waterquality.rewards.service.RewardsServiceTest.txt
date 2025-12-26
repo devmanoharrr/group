@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.waterquality.rewards.service.RewardsServiceTest
+-------------------------------------------------------------------------------
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.189 s - in com.waterquality.rewards.service.RewardsServiceTest

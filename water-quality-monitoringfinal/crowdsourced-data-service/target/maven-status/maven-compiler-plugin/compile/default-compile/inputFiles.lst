@@ -1,0 +1,9 @@
+/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/crowdsourced-data-service/src/main/java/com/waterquality/data/controller/WaterQualityObservationController.java
+/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/crowdsourced-data-service/src/main/java/com/waterquality/data/model/dto/ResponseDTOs.java
+/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/crowdsourced-data-service/src/main/java/com/waterquality/data/CrowdsourcedDataServiceApplication.java
+/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/crowdsourced-data-service/src/main/java/com/waterquality/data/model/dto/SubmissionRequest.java
+/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/crowdsourced-data-service/src/main/java/com/waterquality/data/repository/WaterQualityObservationRepository.java
+/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/crowdsourced-data-service/src/main/java/com/waterquality/data/model/entity/WaterQualityObservation.java
+/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/crowdsourced-data-service/src/main/java/com/waterquality/data/service/WaterQualityObservationService.java
+/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/crowdsourced-data-service/src/main/java/com/waterquality/data/exception/GlobalExceptionHandler.java
+/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/crowdsourced-data-service/src/main/java/com/waterquality/data/exception/CustomExceptions.java

@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: rewards-service
+server:
+  port: 8082
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+rewards:
+  data:
+    base-url: http://localhost:8081
+    batch-size: 50
+  poll:
+    ms: 5000

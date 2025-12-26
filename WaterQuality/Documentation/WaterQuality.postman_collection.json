@@ -1,0 +1,120 @@
+{
+  "info": {
+    "_postman_id": "c8d2e31e-3c2f-4c57-9a3a-8f1e7b7a5b11",
+    "name": "Citizen Science Water Quality",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection for Gateway endpoints of the Citizen Science Water Quality project"
+  },
+  "item": [
+    {
+      "name": "Create Observation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/observations",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "observations"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"citizenId\": \"citizen-001\",\n  \"postcode\": \"NE1 1AA\",\n  \"measurements\": {\n    \"temperatureCelsius\": 12.5,\n    \"ph\": 7.2,\n    \"alkalinityMgPerL\": 40.0,\n    \"turbidityNtu\": 2.0\n  },\n  \"observations\": [\"Clear\"],\n  \"imageData\": []\n}"
+        }
+      }
+    },
+    {
+      "name": "List Observations (All)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/api/observations",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "observations"
+          ]
+        }
+      }
+    },
+    {
+      "name": "List Observations by Citizen",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/api/observations?citizenId=citizen-001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "observations"
+          ],
+          "query": [
+            {
+              "key": "citizenId",
+              "value": "citizen-001"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Recompute Rewards",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://localhost:8080/api/rewards/recompute/citizen-001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "rewards",
+            "recompute",
+            "citizen-001"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Rewards",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/api/rewards/citizen-001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "rewards",
+            "citizen-001"
+          ]
+        }
+      }
+    }
+  ],
+  "event": []
+}

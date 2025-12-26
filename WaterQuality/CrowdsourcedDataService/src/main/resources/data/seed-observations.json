@@ -1,0 +1,18 @@
+[
+  {
+    "citizenId": "citizen-001",
+    "postcode": "NE1 1AA",
+    "measurements": { "temperatureCelsius": 12.5, "ph": 7.1, "alkalinityMgPerL": 40.0, "turbidityNtu": 2.0 },
+    "observations": ["Clear"],
+    "imageData": []
+  },
+  {
+    "citizenId": "citizen-002",
+    "postcode": "NE2 2BB",
+    "measurements": { "ph": 6.8 },
+    "observations": ["Cloudy", "Presence of Odour"],
+    "imageData": []
+  }
+]
+
+

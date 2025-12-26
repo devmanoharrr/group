@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: data-service
+  datasource:
+    url: jdbc:sqlite:file:mem:testdb?mode=memory&cache=shared
+    driver-class-name: org.sqlite.JDBC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 16MB
+
+wq:
+  seed:
+    enabled: false

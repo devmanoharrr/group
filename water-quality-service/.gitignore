@@ -1,0 +1,47 @@
+# --- Java / Maven / Gradle ---
+target/
+*.class
+hs_err_pid*
+replay_pid*
+.gradle/
+build/
+pom.xml.versionsBackup
+
+# --- Node / Vite ---
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+.cache/
+.vite/
+*.local
+.env
+.env.*
+
+# --- IDEs ---
+.idea/
+*.iml
+.vscode/*
+
+# --- OS cruft ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+logs/
+*.log
+
+# --- SQLite artifacts (keep database for submission) ---
+# *.db
+# *.sqlite
+# *.sqlite3
+*.db-shm
+*.db-wal
+*.db-journal
+
+# --- Local data mount (keep folder and database, ignore other files) ---
+data/images/*
+!data/images/.gitkeep
+!data/observations.db
