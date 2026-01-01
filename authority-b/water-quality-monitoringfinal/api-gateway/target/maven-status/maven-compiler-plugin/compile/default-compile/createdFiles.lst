@@ -1,3 +1,5 @@
+com/waterquality/gateway/adapter/AdapterController.class
 com/waterquality/gateway/ApiGatewayApplication.class
 com/waterquality/gateway/config/GatewayConfig.class
+com/waterquality/gateway/config/WebClientConfig.class
 com/waterquality/gateway/filter/LoggingFilter.class

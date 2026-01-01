@@ -1,6 +1,6 @@
-/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/rewards-service/src/main/java/com/waterquality/rewards/controller/RewardsController.java
-/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/rewards-service/src/main/java/com/waterquality/rewards/model/dto/RewardsDTOs.java
-/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/rewards-service/src/main/java/com/waterquality/rewards/service/RewardsService.java
-/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/rewards-service/src/main/java/com/waterquality/rewards/RewardsServiceApplication.java
-/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/rewards-service/src/main/java/com/waterquality/rewards/config/RewardsServiceConfig.java
-/Users/cashify/Downloads/Rani-project/water-quality-monitoring-UPDATED/rewards-service/src/main/java/com/waterquality/rewards/client/DataServiceClient.java
+/Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/rewards-service/src/main/java/com/waterquality/rewards/client/DataServiceClient.java
+/Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/rewards-service/src/main/java/com/waterquality/rewards/RewardsServiceApplication.java
+/Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/rewards-service/src/main/java/com/waterquality/rewards/model/dto/RewardsDTOs.java
+/Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/rewards-service/src/main/java/com/waterquality/rewards/config/RewardsServiceConfig.java
+/Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/rewards-service/src/main/java/com/waterquality/rewards/service/RewardsService.java
+/Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/rewards-service/src/main/java/com/waterquality/rewards/controller/RewardsController.java

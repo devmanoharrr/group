@@ -51,8 +51,13 @@ public class RewardsProxyController {
 
   @GetMapping("/leaderboard")
   public ResponseEntity<String> leaderboard(
-      @RequestParam(name = "authority") String authority,
+      @RequestParam(name = "authority", required = false) String authority,
       @RequestParam(name = "limit", defaultValue = "3") int limit) {
+    
+    // Use default authority if not provided
+    if (authority == null || authority.isEmpty()) {
+      authority = "authority-c";
+    }
 
     final URI uri =
         UriComponentsBuilder.fromHttpUrl(upstreams.getRewards())
