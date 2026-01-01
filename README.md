@@ -71,12 +71,20 @@ Due to port conflicts (multiple services use 8080, 8081, 8082), the following po
 ### Quick Start (Using Scripts)
 
 ```bash
-# Start all services
+# Start all services (recommended)
 ./scripts/run-all.sh
+
+# Check service status
+./scripts/check-service-status.sh
 
 # Stop all services
 ./scripts/stop-all.sh
+
+# View logs
+tail -f scripts/logs/<service-name>.log
 ```
+
+**Note**: Services start in the correct order with health checks. First startup may take 2-5 minutes.
 
 ### Manual Start (Per Authority)
 
@@ -179,11 +187,40 @@ npm run dev
 
 ## Demo Credentials
 
-**Note:** Demo credentials will be added after auth-service implementation. Check `docs/` folder for updated credentials.
+See `docs/demo-credentials.md` for complete demo user information and seed data details.
 
-### Example Users (To be configured)
-- Email: `demo@example.com`
-- Password: `demo123`
+### Quick Start - Register a User
+
+```bash
+curl -X POST http://localhost:8083/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "demo@example.com",
+    "password": "demo123",
+    "name": "Demo User"
+  }'
+```
+
+### Example Users
+
+| Email | Password | Name |
+|-------|----------|------|
+| `demo@example.com` | `demo123` | Demo User |
+| `admin@waterquality.gov` | `admin123` | Admin User |
+
+**Note:** Users must be registered before use. Auth service uses in-memory storage.
+
+### Seed Data
+
+All authorities are automatically seeded with demo data on first startup:
+- **14 observations** per authority
+- **3 contributors** with different point totals
+- **Leaderboards** populated after rewards processing
+
+To process rewards after startup:
+```bash
+./scripts/seed-and-process-rewards.sh
+```
 
 ## Project Structure
 

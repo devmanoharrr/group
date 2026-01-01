@@ -2,14 +2,18 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiRequest, getErrorMessage } from '../utils/api';
+import { theme, getButtonStyle } from '../styles/theme';
+import { AUTHORITY_ENDPOINTS } from '../config/endpoints';
 import MetricCard from './MetricCard';
 import RecentObservationsTable from './RecentObservationsTable';
 import Leaderboard from './Leaderboard';
 import ErrorBanner from './ErrorBanner';
 import Loading from './Loading';
+import ApiExplorer from './ApiExplorer';
 
 export default function Dashboard({ authorityId, authorityName, baseUrl }) {
   const { logout } = useAuth();
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [count, setCount] = useState(null);
   const [observations, setObservations] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -19,6 +23,8 @@ export default function Dashboard({ authorityId, authorityName, baseUrl }) {
     observations: null,
     leaderboard: null,
   });
+  
+  const endpoints = AUTHORITY_ENDPOINTS[authorityId] || [];
 
   const fetchData = async () => {
     setLoading(true);
@@ -42,7 +48,11 @@ export default function Dashboard({ authorityId, authorityName, baseUrl }) {
 
     // Fetch leaderboard
     try {
-      const { data } = await apiRequest(`${baseUrl}/api/rewards/leaderboard?limit=3`);
+      // Authority-C requires authority parameter, others don't
+      const leaderboardUrl = authorityId === 'c' 
+        ? `${baseUrl}/api/rewards/leaderboard?authority=NE&limit=3`
+        : `${baseUrl}/api/rewards/leaderboard?limit=3`;
+      const { data } = await apiRequest(leaderboardUrl);
       setLeaderboard(Array.isArray(data) ? data : []);
     } catch (error) {
       setErrors(prev => ({ ...prev, leaderboard: getErrorMessage(error) }));
@@ -53,6 +63,7 @@ export default function Dashboard({ authorityId, authorityName, baseUrl }) {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseUrl]);
 
   if (loading && count === null && observations.length === 0 && leaderboard.length === 0) {
@@ -60,44 +71,100 @@ export default function Dashboard({ authorityId, authorityName, baseUrl }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: theme.colors.bgSecondary }}>
       <header style={{
-        backgroundColor: 'white',
-        padding: '1rem 2rem',
-        borderBottom: '1px solid #ddd',
+        backgroundColor: theme.colors.bgPrimary,
+        padding: `${theme.spacing.lg} ${theme.spacing.xl}`,
+        borderBottom: `1px solid ${theme.colors.borderLight}`,
+        boxShadow: theme.shadows.sm,
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
+        width: '100%',
+        boxSizing: 'border-box',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.lg }}>
           <Link
             to="/hub"
             style={{
-              padding: '0.5rem 1rem',
-              color: '#3498db',
+              ...getButtonStyle('ghost', 'sm'),
               textDecoration: 'none',
             }}
           >
             ← Back to Hub
           </Link>
-          <h1 style={{ margin: 0 }}>{authorityName} Dashboard</h1>
+          <h1 style={{ 
+            margin: 0,
+            fontSize: '1.5rem',
+            fontWeight: '700',
+            color: theme.colors.textPrimary,
+          }}>
+            {authorityName} Dashboard
+          </h1>
         </div>
         <button
           onClick={logout}
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#e74c3c',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
+          style={getButtonStyle('danger', 'sm')}
         >
           Logout
         </button>
       </header>
 
-      <main style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+      {/* Tabs */}
+      <div style={{
+        backgroundColor: theme.colors.bgPrimary,
+        borderBottom: `1px solid ${theme.colors.borderLight}`,
+        padding: `0 ${theme.spacing.xl}`,
+        width: '100%',
+        boxSizing: 'border-box',
+      }}>
+        <div style={{
+          display: 'flex',
+          gap: theme.spacing.md,
+          maxWidth: '100%',
+          width: '100%',
+        }}>
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            style={{
+              padding: `${theme.spacing.md} ${theme.spacing.lg}`,
+              border: 'none',
+              borderBottom: `3px solid ${activeTab === 'dashboard' ? theme.colors.primary : 'transparent'}`,
+              backgroundColor: 'transparent',
+              color: activeTab === 'dashboard' ? theme.colors.primary : theme.colors.textSecondary,
+              fontWeight: activeTab === 'dashboard' ? '600' : '500',
+              cursor: 'pointer',
+              transition: `all ${theme.transitions.fast}`,
+            }}
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => setActiveTab('api')}
+            style={{
+              padding: `${theme.spacing.md} ${theme.spacing.lg}`,
+              border: 'none',
+              borderBottom: `3px solid ${activeTab === 'api' ? theme.colors.primary : 'transparent'}`,
+              backgroundColor: 'transparent',
+              color: activeTab === 'api' ? theme.colors.primary : theme.colors.textSecondary,
+              fontWeight: activeTab === 'api' ? '600' : '500',
+              cursor: 'pointer',
+              transition: `all ${theme.transitions.fast}`,
+            }}
+          >
+            API Explorer
+          </button>
+        </div>
+      </div>
+
+      <main style={{ 
+        padding: theme.spacing.xl, 
+        width: '100%',
+        margin: '0 auto',
+        boxSizing: 'border-box',
+      }}>
+        {activeTab === 'dashboard' ? (
+          <>
         {/* Error banners */}
         {errors.count && (
           <ErrorBanner
@@ -122,7 +189,7 @@ export default function Dashboard({ authorityId, authorityName, baseUrl }) {
         )}
 
         {/* Metric Card */}
-        <div style={{ marginBottom: '2rem' }}>
+            <div style={{ marginBottom: theme.spacing.xl }}>
           <MetricCard
             title="Total Observations"
             value={count}
@@ -133,9 +200,9 @@ export default function Dashboard({ authorityId, authorityName, baseUrl }) {
         {/* Two column layout for observations and leaderboard */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '2fr 1fr',
-          gap: '2rem',
-          marginBottom: '2rem',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+              gap: theme.spacing.xl,
+              marginBottom: theme.spacing.xl,
         }}>
           <RecentObservationsTable
             observations={observations}
@@ -148,6 +215,14 @@ export default function Dashboard({ authorityId, authorityName, baseUrl }) {
             error={errors.leaderboard}
           />
         </div>
+          </>
+        ) : (
+          <ApiExplorer 
+            authorityId={authorityId}
+            baseUrl={baseUrl}
+            endpoints={endpoints}
+          />
+        )}
       </main>
     </div>
   );

@@ -1,5 +1,6 @@
 /Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/crowdsourced-data-service/src/main/java/com/waterquality/data/controller/WaterQualityObservationController.java
 /Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/crowdsourced-data-service/src/main/java/com/waterquality/data/exception/GlobalExceptionHandler.java
+/Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/crowdsourced-data-service/src/main/java/com/waterquality/data/config/SeedDataLoader.java
 /Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/crowdsourced-data-service/src/main/java/com/waterquality/data/exception/CustomExceptions.java
 /Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/crowdsourced-data-service/src/main/java/com/waterquality/data/model/dto/SubmissionRequest.java
 /Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/crowdsourced-data-service/src/main/java/com/waterquality/data/model/dto/ResponseDTOs.java

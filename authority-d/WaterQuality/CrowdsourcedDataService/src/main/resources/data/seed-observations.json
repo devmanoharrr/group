@@ -2,15 +2,106 @@
   {
     "citizenId": "citizen-001",
     "postcode": "NE1 1AA",
-    "measurements": { "temperatureCelsius": 12.5, "ph": 7.1, "alkalinityMgPerL": 40.0, "turbidityNtu": 2.0 },
+    "measurements": { "temperatureCelsius": 18.5, "ph": 7.2, "alkalinityMgPerL": 120.0, "turbidityNtu": 1.5 },
+    "observations": ["Clear"],
+    "imageData": []
+  },
+  {
+    "citizenId": "citizen-001",
+    "postcode": "NE1 1AB",
+    "measurements": { "temperatureCelsius": 19.0, "ph": 7.3, "alkalinityMgPerL": 125.0, "turbidityNtu": 1.8 },
+    "observations": ["Clear"],
+    "imageData": []
+  },
+  {
+    "citizenId": "citizen-001",
+    "postcode": "NE1 1AC",
+    "measurements": { "temperatureCelsius": 17.8, "ph": 7.1, "alkalinityMgPerL": 115.0, "turbidityNtu": 1.2 },
+    "observations": ["Clear"],
+    "imageData": []
+  },
+  {
+    "citizenId": "citizen-001",
+    "postcode": "NE1 1AD",
+    "measurements": { "temperatureCelsius": 20.1, "ph": 7.4, "alkalinityMgPerL": 130.0, "turbidityNtu": 2.0 },
+    "observations": ["Clear"],
+    "imageData": []
+  },
+  {
+    "citizenId": "citizen-001",
+    "postcode": "NE1 1AE",
+    "measurements": { "temperatureCelsius": 18.2, "ph": 7.2, "alkalinityMgPerL": 118.0, "turbidityNtu": 1.6 },
     "observations": ["Clear"],
     "imageData": []
   },
   {
     "citizenId": "citizen-002",
     "postcode": "NE2 2BB",
+    "measurements": { "temperatureCelsius": 16.5, "ph": 6.8, "alkalinityMgPerL": 95.0, "turbidityNtu": 2.5 },
+    "observations": ["Cloudy"],
+    "imageData": []
+  },
+  {
+    "citizenId": "citizen-002",
+    "postcode": "NE2 2BC",
+    "measurements": { "temperatureCelsius": 17.0, "ph": 6.9, "alkalinityMgPerL": 100.0, "turbidityNtu": 2.8 },
+    "observations": ["Cloudy", "Foamy"],
+    "imageData": []
+  },
+  {
+    "citizenId": "citizen-002",
+    "postcode": "NE2 2BD",
+    "measurements": { "temperatureCelsius": 15.8, "ph": 6.7, "alkalinityMgPerL": 90.0, "turbidityNtu": 3.0 },
+    "observations": ["Murky"],
+    "imageData": []
+  },
+  {
+    "citizenId": "citizen-002",
+    "postcode": "NE2 2BE",
+    "measurements": { "temperatureCelsius": 16.2, "ph": 6.9, "alkalinityMgPerL": 98.0, "turbidityNtu": 2.6 },
+    "observations": ["Foamy"],
+    "imageData": []
+  },
+  {
+    "citizenId": "citizen-002",
+    "postcode": "NE2 2BF",
+    "measurements": { "ph": 6.5 },
+    "observations": ["Presence of Odour"],
+    "imageData": []
+  },
+  {
+    "citizenId": "citizen-002",
+    "postcode": "NE2 2BG",
+    "measurements": { "temperatureCelsius": 16.0, "turbidityNtu": 2.2 },
+    "observations": ["Discoloured"],
+    "imageData": []
+  },
+  {
+    "citizenId": "citizen-003",
+    "postcode": "NE3 3CC",
+    "measurements": { "temperatureCelsius": 14.5, "ph": 7.0, "alkalinityMgPerL": 85.0, "turbidityNtu": 1.8 },
+    "observations": ["Clear"],
+    "imageData": []
+  },
+  {
+    "citizenId": "citizen-003",
+    "postcode": "NE3 3CD",
+    "measurements": { "temperatureCelsius": 15.0, "ph": 7.1, "alkalinityMgPerL": 88.0, "turbidityNtu": 1.9 },
+    "observations": ["Clear"],
+    "imageData": []
+  },
+  {
+    "citizenId": "citizen-003",
+    "postcode": "NE3 3CE",
+    "measurements": { "temperatureCelsius": 14.8, "ph": 6.9, "alkalinityMgPerL": 87.0, "turbidityNtu": 1.7 },
+    "observations": ["Clear"],
+    "imageData": []
+  },
+  {
+    "citizenId": "citizen-003",
+    "postcode": "NE3 3CF",
     "measurements": { "ph": 6.8 },
-    "observations": ["Cloudy", "Presence of Odour"],
+    "observations": ["Presence of Odour"],
     "imageData": []
   }
 ]

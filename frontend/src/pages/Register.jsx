@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { theme, getButtonStyle, getInputStyle, getCardStyle } from '../styles/theme';
 import ErrorBanner from '../components/ErrorBanner';
 
 export default function Register() {
@@ -40,67 +41,94 @@ export default function Register() {
     setLoading(false);
   };
 
+  const buttonStyle = getButtonStyle('primary');
+  const inputStyle = getInputStyle();
+
   return (
     <div style={{
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: '100vh',
-      backgroundColor: '#f5f5f5',
+      backgroundColor: theme.colors.bgSecondary,
+      padding: theme.spacing.md,
     }}>
       <div style={{
-        backgroundColor: 'white',
-        padding: '2rem',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        ...getCardStyle(false),
         width: '100%',
-        maxWidth: '400px',
+        maxWidth: '440px',
       }}>
-        <h1 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Register</h1>
+        <div style={{ textAlign: 'center', marginBottom: theme.spacing.xl }}>
+          <h1 style={{ 
+            marginBottom: theme.spacing.sm,
+            fontSize: '2rem',
+            fontWeight: '700',
+            color: theme.colors.textPrimary,
+            background: `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.secondary} 100%)`,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}>
+            Create Account
+          </h1>
+          <p style={{ 
+            color: theme.colors.textSecondary,
+            fontSize: '0.9375rem',
+          }}>
+            Join the Water Quality Monitoring System
+          </p>
+        </div>
         
         <ErrorBanner error={error} onDismiss={() => setError(null)} />
 
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-              Name
+        <form onSubmit={handleSubmit} style={{ marginTop: theme.spacing.lg }}>
+          <div style={{ marginBottom: theme.spacing.lg }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: theme.spacing.sm, 
+              fontWeight: '600',
+              color: theme.colors.textPrimary,
+              fontSize: '0.9375rem',
+            }}>
+              Full Name
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '1rem',
-              }}
+              placeholder="John Doe"
+              style={inputStyle}
             />
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-              Email
+          <div style={{ marginBottom: theme.spacing.lg }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: theme.spacing.sm, 
+              fontWeight: '600',
+              color: theme.colors.textPrimary,
+              fontSize: '0.9375rem',
+            }}>
+              Email Address
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '1rem',
-              }}
+              placeholder="you@example.com"
+              style={inputStyle}
             />
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+          <div style={{ marginBottom: theme.spacing.lg }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: theme.spacing.sm, 
+              fontWeight: '600',
+              color: theme.colors.textPrimary,
+              fontSize: '0.9375rem',
+            }}>
               Password
             </label>
             <input
@@ -108,18 +136,19 @@ export default function Register() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '1rem',
-              }}
+              placeholder="At least 6 characters"
+              style={inputStyle}
             />
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+          <div style={{ marginBottom: theme.spacing.xl }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: theme.spacing.sm, 
+              fontWeight: '600',
+              color: theme.colors.textPrimary,
+              fontSize: '0.9375rem',
+            }}>
               Confirm Password
             </label>
             <input
@@ -127,13 +156,8 @@ export default function Register() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '1rem',
-              }}
+              placeholder="Re-enter your password"
+              style={inputStyle}
             />
           </div>
 
@@ -141,23 +165,28 @@ export default function Register() {
             type="submit"
             disabled={loading}
             style={{
+              ...buttonStyle,
               width: '100%',
-              padding: '0.75rem',
-              backgroundColor: loading ? '#95a5a6' : '#3498db',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              cursor: loading ? 'not-allowed' : 'pointer',
             }}
           >
-            {loading ? 'Registering...' : 'Register'}
+            {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 
-        <p style={{ marginTop: '1rem', textAlign: 'center', color: '#666' }}>
-          Already have an account? <Link to="/login" style={{ color: '#3498db' }}>Login</Link>
+        <p style={{ 
+          marginTop: theme.spacing.xl, 
+          textAlign: 'center', 
+          color: theme.colors.textSecondary,
+          fontSize: '0.9375rem',
+        }}>
+          Already have an account?{' '}
+          <Link to="/login" style={{ 
+            color: theme.colors.primary,
+            fontWeight: '600',
+            textDecoration: 'none',
+          }}>
+            Sign In
+          </Link>
         </p>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { theme, getButtonStyle, getInputStyle, getCardStyle } from '../styles/theme';
 import ErrorBanner from '../components/ErrorBanner';
 
 export default function ChangePassword() {
@@ -44,42 +45,67 @@ export default function ChangePassword() {
     setLoading(false);
   };
 
+  const buttonStyle = getButtonStyle('primary');
+  const inputStyle = getInputStyle();
+
   return (
     <div style={{
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: '100vh',
-      backgroundColor: '#f5f5f5',
+      backgroundColor: theme.colors.bgSecondary,
+      padding: theme.spacing.md,
     }}>
       <div style={{
-        backgroundColor: 'white',
-        padding: '2rem',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        ...getCardStyle(false),
         width: '100%',
-        maxWidth: '400px',
+        maxWidth: '440px',
       }}>
-        <h1 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Change Password</h1>
+        <div style={{ textAlign: 'center', marginBottom: theme.spacing.xl }}>
+          <h1 style={{ 
+            marginBottom: theme.spacing.sm,
+            fontSize: '2rem',
+            fontWeight: '700',
+            color: theme.colors.textPrimary,
+            background: `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.secondary} 100%)`,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}>
+            Change Password
+          </h1>
+          <p style={{ 
+            color: theme.colors.textSecondary,
+            fontSize: '0.9375rem',
+          }}>
+            Update your account password
+          </p>
+        </div>
         
         {success && (
           <div style={{
-            backgroundColor: '#d4edda',
-            border: '1px solid #c3e6cb',
-            borderRadius: '4px',
-            padding: '1rem',
-            marginBottom: '1rem',
-            color: '#155724',
+            backgroundColor: '#d1fae5',
+            border: `1px solid ${theme.colors.success}`,
+            borderRadius: theme.borderRadius.md,
+            padding: theme.spacing.md,
+            marginBottom: theme.spacing.lg,
+            color: theme.colors.secondaryDark,
           }}>
-            Password changed successfully! Redirecting...
+            ✓ Password changed successfully! Redirecting...
           </div>
         )}
 
         <ErrorBanner error={error} onDismiss={() => setError(null)} />
 
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+        <form onSubmit={handleSubmit} style={{ marginTop: theme.spacing.lg }}>
+          <div style={{ marginBottom: theme.spacing.lg }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: theme.spacing.sm, 
+              fontWeight: '600',
+              color: theme.colors.textPrimary,
+              fontSize: '0.9375rem',
+            }}>
               Current Password
             </label>
             <input
@@ -87,18 +113,19 @@ export default function ChangePassword() {
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '1rem',
-              }}
+              placeholder="Enter current password"
+              style={inputStyle}
             />
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+          <div style={{ marginBottom: theme.spacing.lg }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: theme.spacing.sm, 
+              fontWeight: '600',
+              color: theme.colors.textPrimary,
+              fontSize: '0.9375rem',
+            }}>
               New Password
             </label>
             <input
@@ -106,18 +133,19 @@ export default function ChangePassword() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '1rem',
-              }}
+              placeholder="At least 6 characters"
+              style={inputStyle}
             />
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+          <div style={{ marginBottom: theme.spacing.xl }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: theme.spacing.sm, 
+              fontWeight: '600',
+              color: theme.colors.textPrimary,
+              fontSize: '0.9375rem',
+            }}>
               Confirm New Password
             </label>
             <input
@@ -125,13 +153,8 @@ export default function ChangePassword() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '1rem',
-              }}
+              placeholder="Re-enter new password"
+              style={inputStyle}
             />
           </div>
 
@@ -139,15 +162,8 @@ export default function ChangePassword() {
             type="submit"
             disabled={loading || success}
             style={{
+              ...buttonStyle,
               width: '100%',
-              padding: '0.75rem',
-              backgroundColor: loading || success ? '#95a5a6' : '#3498db',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              cursor: loading || success ? 'not-allowed' : 'pointer',
             }}
           >
             {loading ? 'Changing...' : success ? 'Success!' : 'Change Password'}

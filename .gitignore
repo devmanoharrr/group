@@ -197,3 +197,4 @@ data/images/*
 # Uncomment if you want to ignore all database files in data directories
 # data/*.db
 
+docs

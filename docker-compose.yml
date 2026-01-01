@@ -1,0 +1,87 @@
+version: '3.8'
+
+# =============================================================================
+# Docker Compose for Water Quality Monitoring Project
+# =============================================================================
+#
+# Note: This is a hybrid approach. Some services (with SQLite/MongoDB) may
+# need to run via scripts due to local file system access requirements.
+#
+# Services that can be containerized:
+# - Auth Service
+# - Frontend (if built)
+#
+# Services that may need local file system access:
+# - Authority services with SQLite databases
+# - Authority-D with MongoDB (unless MongoDB is containerized)
+#
+# Usage:
+#   docker-compose up -d          # Start services
+#   docker-compose down           # Stop services
+#   docker-compose logs -f        # View logs
+#
+# =============================================================================
+
+services:
+  # Auth Service
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: water-quality-auth-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - water-quality-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend (production build)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: water-quality-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - auth-service
+    networks:
+      - water-quality-network
+    environment:
+      - VITE_AUTH_SERVICE_URL=http://localhost:8083
+      - VITE_AUTHORITY_A_URL=http://localhost:8080
+      - VITE_AUTHORITY_B_URL=http://localhost:8090
+      - VITE_AUTHORITY_C_URL=http://localhost:8100
+      - VITE_AUTHORITY_D_URL=http://localhost:8110
+      - VITE_AUTHORITY_E_URL=http://localhost:8120
+
+  # MongoDB for Authority-D (optional - can use local MongoDB)
+  mongodb:
+    image: mongo:7.0
+    container_name: water-quality-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - water-quality-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  water-quality-network:
+    driver: bridge
+
+volumes:
+  mongodb-data:
+

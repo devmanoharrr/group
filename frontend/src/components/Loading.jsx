@@ -1,3 +1,5 @@
+import { theme } from '../styles/theme';
+
 export default function Loading({ message = 'Loading...' }) {
   return (
     <div style={{ 
@@ -5,17 +7,25 @@ export default function Loading({ message = 'Loading...' }) {
       flexDirection: 'column', 
       alignItems: 'center', 
       justifyContent: 'center',
-      padding: '2rem'
+      minHeight: '400px',
+      padding: theme.spacing['2xl'],
     }}>
       <div style={{
-        width: '40px',
-        height: '40px',
-        border: '4px solid #f3f3f3',
-        borderTop: '4px solid #3498db',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite'
+        width: '48px',
+        height: '48px',
+        border: `4px solid ${theme.colors.gray200}`,
+        borderTop: `4px solid ${theme.colors.primary}`,
+        borderRadius: theme.borderRadius.full,
+        animation: 'spin 1s linear infinite',
       }}></div>
-      <p style={{ marginTop: '1rem', color: '#666' }}>{message}</p>
+      <p style={{ 
+        marginTop: theme.spacing.lg, 
+        color: theme.colors.textSecondary,
+        fontSize: '0.9375rem',
+        fontWeight: '500',
+      }}>
+        {message}
+      </p>
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }

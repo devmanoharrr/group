@@ -1,5 +1,6 @@
 com/waterquality/data/model/dto/ResponseDTOs$StatsResponse$StatsResponseBuilder.class
 com/waterquality/data/service/WaterQualityObservationService.class
+com/waterquality/data/config/SeedDataLoader.class
 com/waterquality/data/model/dto/ResponseDTOs$ErrorResponse$ErrorResponseBuilder.class
 com/waterquality/data/model/dto/ResponseDTOs$SubmissionResponse$SubmissionResponseBuilder.class
 com/waterquality/data/model/dto/SubmissionRequest$SubmissionRequestBuilder.class

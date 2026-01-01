@@ -3,3 +3,4 @@
 /Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/api-gateway/src/main/java/com/waterquality/gateway/ApiGatewayApplication.java
 /Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/api-gateway/src/main/java/com/waterquality/gateway/config/GatewayConfig.java
 /Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/api-gateway/src/main/java/com/waterquality/gateway/config/WebClientConfig.java
+/Users/manoharreddy/Desktop/personal/bharath/group/ind/authority-b/water-quality-monitoringfinal/api-gateway/src/main/java/com/waterquality/gateway/config/CorsConfig.java

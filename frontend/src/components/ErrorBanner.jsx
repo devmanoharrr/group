@@ -1,33 +1,34 @@
+import { theme, getButtonStyle } from '../styles/theme';
+
 export default function ErrorBanner({ error, onRetry, onDismiss }) {
   if (!error) return null;
 
   return (
     <div style={{
-      backgroundColor: '#fee',
-      border: '1px solid #fcc',
-      borderRadius: '4px',
-      padding: '1rem',
-      marginBottom: '1rem',
+      backgroundColor: '#fee2e2',
+      border: `1px solid ${theme.colors.danger}`,
+      borderRadius: theme.borderRadius.md,
+      padding: theme.spacing.md,
+      marginBottom: theme.spacing.md,
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
+      gap: theme.spacing.md,
     }}>
-      <div style={{ flex: 1 }}>
-        <strong style={{ color: '#c33' }}>Error:</strong>
-        <span style={{ marginLeft: '0.5rem', color: '#333' }}>{error}</span>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
+        <span style={{ fontSize: '1.25rem' }}>⚠️</span>
+        <div>
+          <strong style={{ color: theme.colors.dangerDark, display: 'block', marginBottom: theme.spacing.xs }}>
+            Error:
+          </strong>
+          <span style={{ color: theme.colors.textPrimary }}>{error}</span>
+        </div>
       </div>
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
+      <div style={{ display: 'flex', gap: theme.spacing.sm, flexShrink: 0 }}>
         {onRetry && (
           <button
             onClick={onRetry}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#3498db',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
+            style={getButtonStyle('primary', 'sm')}
           >
             Retry
           </button>
@@ -35,14 +36,7 @@ export default function ErrorBanner({ error, onRetry, onDismiss }) {
         {onDismiss && (
           <button
             onClick={onDismiss}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#95a5a6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
+            style={getButtonStyle('ghost', 'sm')}
           >
             Dismiss
           </button>

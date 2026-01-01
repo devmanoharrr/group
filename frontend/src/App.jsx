@@ -9,6 +9,7 @@ import DashboardAuthorityA from './pages/DashboardAuthorityA';
 import DashboardAuthorityB from './pages/DashboardAuthorityB';
 import DashboardAuthorityC from './pages/DashboardAuthorityC';
 import DashboardAuthorityD from './pages/DashboardAuthorityD';
+import DashboardAuthorityE from './pages/DashboardAuthorityE';
 
 function App() {
   return (
@@ -62,6 +63,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardAuthorityD />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/authority-e"
+            element={
+              <ProtectedRoute>
+                <DashboardAuthorityE />
               </ProtectedRoute>
             }
           />
