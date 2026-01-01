@@ -1,0 +1,16 @@
+server:
+  port: 8110
+
+services:
+  crowdsourced:
+    baseUrl: http://localhost:8111
+  rewards:
+    baseUrl: http://localhost:8112
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+

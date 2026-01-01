@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: api-gateway
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 40MB
+server:
+  port: 8100
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+upstreams:
+  data: http://localhost:8101
+  rewards: http://localhost:8102
+
+gateway:
+  cors:
+    allowed-origins: "http://localhost:5173,http://localhost:3000"

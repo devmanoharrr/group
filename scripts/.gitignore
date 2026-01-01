@@ -1,0 +1,7 @@
+# Service PID file
+.service-pids
+
+# Log files
+logs/
+*.log
+

@@ -1,0 +1,475 @@
+# Complete Integration Instructions
+
+## 0) One-time setup in Cursor
+
+### 0.1 Create a single monorepo
+
+**Autopilot prompt:**
+
+You are the repo-integrator. Create a clean monorepo structure for a group microservices project:
+
+- **auth-service/** (Spring Boot) - NEW service to be created
+- **frontend/** (Vite React) - NEW frontend to be created
+- **authority-a/** - Contains `CitizenScienceWaterQualityApplication/` (monolithic Spring Boot app on port 8080, SQLite)
+- **authority-b/** - Contains `water-quality-monitoringfinal/` (3 services: api-gateway:8080, crowdsourced-data-service:8081, rewards-service:8082, SQLite)
+- **authority-c/** - Contains `water-quality-service/` (3 services: api-gateway:8080, data-service:8081, rewards-service:8082, SQLite)
+- **authority-d/** - Contains `WaterQuality/` (3 services: Gateway:8080, CrowdsourcedDataService:8081, RewardsService:8082, MongoDB)
+- **authority-e/** - Placeholder for 5th member (to be added later)
+- **docs/** - Documentation folder
+- **scripts/** - Utility scripts
+
+**Important:** Do NOT rename or modify any existing files/folders inside the member microservices. Move them as-is into their authority folders.
+
+Add a root README.md with:
+- Port assignments for all services
+- Run steps for each authority
+- Demo credentials
+- Architecture overview
+
+**Gate:** Repo tree exists, README present, all 4 existing microservices moved into authority-a through authority-d folders.
+
+### 0.2 Add a "single command run" plan
+
+**Autopilot prompt:**
+
+Create `scripts/run-all.sh` and `scripts/stop-all.sh` that can start/stop:
+- auth-service (port 8083 - to avoid conflicts)
+- frontend (port 5173)
+- authority-a (port 8080)
+- authority-b (api-gateway:8080, crowdsourced-data-service:8081, rewards-service:8082)
+- authority-c (api-gateway:8080, data-service:8081, rewards-service:8082)
+- authority-d (Gateway:8080, CrowdsourcedDataService:8081, RewardsService:8082)
+
+**Note:** Port conflicts exist (multiple services use 8080, 8081, 8082). The scripts should:
+1. Document port conflicts clearly
+2. Provide a port mapping strategy (e.g., authority-b uses 8090/8091/8092, authority-c uses 8100/8101/8102, authority-d uses 8110/8111/8112)
+3. Include instructions for updating application.yml/properties files in each service to use the new ports
+4. Use placeholders for commands per module and document how to fill them
+
+Ensure scripts are macOS/Linux compatible.
+
+**Gate:** Scripts exist and are executable (chmod +x).
+
+---
+
+## 1) Define the API contract
+
+Create `docs/api-contract.md` with the three dashboard needs per authority:
+
+**Autopilot prompt:**
+
+Write `docs/api-contract.md` defining a minimal consistent contract for authority dashboards:
+
+1. **GET /api/observations/count** → `{count: number}`
+   - Optional query param: `authority` (string)
+   
+2. **GET /api/observations/recent?limit=5** → `[{postcode, measurements, observation, createdAt, contributorId}]`
+   - Query params: `limit` (number, default 5, max 50), optional `authority` (string)
+   - Response array ordered by createdAt DESC
+   
+3. **GET /api/rewards/leaderboard?limit=3** → `[{contributorId, points, rank}]`
+   - Query params: `limit` (number, default 3, max 50), optional `authority` (string)
+   - Response array ordered by points DESC
+
+Include error response shape:
+```json
+{
+  "timestamp": "ISO8601 string",
+  "status": 400|404|500|503,
+  "error": "Error type",
+  "message": "Human-readable message",
+  "path": "/api/observations/count"
+}
+```
+
+Status codes:
+- 200 OK - Success
+- 400 Bad Request - Invalid query params
+- 404 Not Found - Resource not found
+- 500 Internal Server Error - Server error
+- 503 Service Unavailable - Downstream service unavailable
+
+Keep it simple and implementation-agnostic.
+
+**Gate:** Contract file exists and is readable.
+
+---
+
+## 2) Auth Service (Spring Boot) — required features
+
+### 2.1 Scaffold Spring Boot app
+
+**Autopilot prompt:**
+
+In `auth-service/`, generate a Spring Boot project that supports:
+- register, login, change password
+- in-memory persistence (H2 or in-memory repository)
+- BCrypt password hashing
+- simple token-based auth (JWT or opaque token) suitable for React
+
+Provide:
+- Controller endpoints
+- Service layer
+- Repository layer
+- Security config (Spring Security)
+- User entity/model
+
+Add minimal tests.
+
+**Gate:** `./mvnw test` passes in auth-service. Service starts locally on port 8083.
+
+### 2.2 Implement endpoints exactly
+
+**Autopilot prompt:**
+
+Ensure auth endpoints exist:
+
+- **POST /auth/register** `{email, password, name}` → `{token, user: {id, email, name}}`
+- **POST /auth/login** `{email, password}` → `{token, user: {id, email, name}}`
+- **POST /auth/change-password** `{oldPassword, newPassword}` (requires Authorization header) → `{message: "Password changed successfully"}`
+- **GET /auth/me** (requires Authorization header) → `{id, email, name}`
+
+Use BCrypt for password hashing. Return consistent JSON. Add global error handler returning:
+```json
+{
+  "timestamp": "ISO8601",
+  "status": 400|401|404|500,
+  "error": "Error type",
+  "message": "Human-readable",
+  "path": "/auth/login"
+}
+```
+
+Update tests accordingly.
+
+**Gate:** Manual curl test works for register/login/change-password. Wrong password returns 401 with JSON error body.
+
+---
+
+## 3) Standardize authority services (minimal adapters)
+
+Goal: Each authority folder must expose the contract endpoints used by React, even if internally it calls existing microservices.
+
+### 3.1 Add a lightweight "API adapter" per authority
+
+**Autopilot prompt:**
+
+For each authority (authority-a, authority-b, authority-c, authority-d), implement/ensure the API contract endpoints exist:
+
+- **GET /api/observations/count** (optional `?authority=X`)
+- **GET /api/observations/recent?limit=5** (optional `?authority=X`)
+- **GET /api/rewards/leaderboard?limit=3** (optional `?authority=X`)
+
+**Implementation strategy per authority:**
+
+**Authority-A (CitizenScienceWaterQualityApplication):**
+- This is a monolithic app on port 8080
+- Add adapter endpoints that:
+  - Map `/api/observations/count` → query `CrowdsourcedRepository.count()`
+  - Map `/api/observations/recent?limit=5` → query `CrowdsourcedRepository.findAll()` ordered by creation time, limit 5
+  - Map `/api/rewards/leaderboard?limit=3` → query `RewardService` to get top 3 contributors by points
+- Add a new `AdapterController` class with these 3 endpoints
+- Do NOT modify existing controllers, only add new ones
+
+**Authority-B (water-quality-monitoringfinal):**
+- Has api-gateway (8080), crowdsourced-data-service (8081), rewards-service (8082)
+- Add adapter endpoints in the api-gateway that:
+  - Map `/api/observations/count` → call crowdsourced-data-service `/api/data/stats` and extract total count
+  - Map `/api/observations/recent?limit=5` → call crowdsourced-data-service `/api/data/observations?limit=5` and transform response
+  - Map `/api/rewards/leaderboard?limit=3` → call rewards-service `/api/rewards/leaderboard?limit=3` and transform response
+- Add adapter controller in api-gateway that proxies to internal services and transforms responses
+
+**Authority-C (water-quality-service):**
+- Has api-gateway (8080), data-service (8081), rewards-service (8082)
+- Add adapter endpoints in the api-gateway that:
+  - Map `/api/observations/count` → call data-service `/api/data/observations/count?authority=X`
+  - Map `/api/observations/recent?limit=5` → call data-service `/api/data/observations/latest?limit=5&authority=X` and transform response
+  - Map `/api/rewards/leaderboard?limit=3` → call rewards-service `/api/rewards/leaderboard?authority=X&limit=3` and transform response
+- Add adapter controller in api-gateway
+
+**Authority-D (WaterQuality):**
+- Has Gateway (8080), CrowdsourcedDataService (8081), RewardsService (8082), uses MongoDB
+- Add adapter endpoints in the Gateway that:
+  - Map `/api/observations/count` → call CrowdsourcedDataService `/api/observations` (list all) and count, or add a count endpoint
+  - Map `/api/observations/recent?limit=5` → call CrowdsourcedDataService `/api/observations` and transform to contract format, limit 5
+  - Map `/api/rewards/leaderboard?limit=3` → call RewardsService to get rewards for all citizens, sort by points, return top 3 (may need to add leaderboard endpoint)
+- Add adapter controller in Gateway
+
+**Important:**
+- Do NOT modify existing microservice code. Only add new adapter controllers/endpoints.
+- If existing services use different paths/fields, add an adapter layer to map to the contract response shapes.
+- Include basic input validation and error handling.
+- If a downstream dependency is down, return 503 with proper error JSON.
+
+**Gate:** Each authority responds correctly to the 3 endpoints. `limit` works. Service returns 503 if downstream dependency is down.
+
+---
+
+## 4) Frontend (Vite React) — required UI
+
+### 4.1 Scaffold Vite React app
+
+**Autopilot prompt:**
+
+In `frontend/`, create a Vite React app with:
+- React Router
+- Pages: Login, Register, ChangePassword, Hub, DashboardAuthorityA, DashboardAuthorityB, DashboardAuthorityC, DashboardAuthorityD
+- Shared components: MetricCard, RecentObservationsTable, Leaderboard, ErrorBanner, Loading
+- Environment-based config for base URLs (auth + each authority)
+
+Do not hardcode URLs; use `.env.*` with `VITE_*` variables:
+- `VITE_AUTH_SERVICE_URL=http://localhost:8083`
+- `VITE_AUTHORITY_A_URL=http://localhost:8080`
+- `VITE_AUTHORITY_B_URL=http://localhost:8090` (or mapped port)
+- `VITE_AUTHORITY_C_URL=http://localhost:8100` (or mapped port)
+- `VITE_AUTHORITY_D_URL=http://localhost:8110` (or mapped port)
+
+**Gate:** `npm install` then `npm run dev` works. Routes render.
+
+### 4.2 Auth integration + protected routes
+
+**Autopilot prompt:**
+
+Implement authentication flow:
+- Login stores token (localStorage is ok; document risk in docs)
+- Add an `AuthContext` + `useAuth` hook
+- `ProtectedRoute` redirects unauthenticated users to `/login`
+- Change Password page calls auth service with `Authorization: Bearer <token>` header
+- Add logout functionality
+
+Ensure API client attaches `Authorization: Bearer <token>` header for protected endpoints.
+
+**Gate:** Without login you cannot access Hub/Dashboards. After login you can navigate all pages. Change password works.
+
+### 4.3 Hub page links to 4 dashboards
+
+**Autopilot prompt:**
+
+Implement Hub page:
+- Show 4 cards/links (Authority A, B, C, D)
+- Each link routes to its dashboard page (`/dashboard/authority-a`, `/dashboard/authority-b`, etc.)
+- Include a small "service status" indicator per authority based on a lightweight ping (optional) or show error when dashboard loads
+
+**Gate:** Hub displays and links correctly.
+
+### 4.4 Each dashboard page fetches from that authority only
+
+**Autopilot prompt:**
+
+For each dashboard page (A, B, C, D):
+- Fetch `/api/observations/count` from that authority's base URL
+- Fetch `/api/observations/recent?limit=5` from that authority's base URL
+- Fetch `/api/rewards/leaderboard?limit=3` from that authority's base URL
+
+Use the authority-specific base URL from config.
+
+Show loading states, error states, and render the three required UI blocks:
+1. Total observations count (MetricCard)
+2. Five recent observations (RecentObservationsTable)
+3. Leaderboard top 3 (Leaderboard component)
+
+Do not fetch data for other authorities on this page.
+
+**Gate:** Verify in Network tab: dashboard A calls only authority A endpoints. Page shows required data blocks.
+
+### 4.5 Frontend error handling
+
+**Autopilot prompt:**
+
+Improve frontend resilience:
+- Centralize API calls with fetch wrapper supporting timeout, JSON parsing, error normalization
+- Display friendly messages for 401, 403, 404, 500, network failures
+- Add Retry button on error states
+- If one authority is down, other dashboards still work
+
+**Gate:** Kill one authority service → dashboard shows error UI but app stays usable.
+
+---
+
+## 5) Integration "one command run"
+
+### 5.1 Docker Compose (best) OR robust run scripts
+
+**Autopilot prompt:**
+
+Create a `docker-compose.yml` to run:
+- auth-service (port 8083)
+- frontend (port 5173)
+- authority-a (port 8080)
+- authority-b (api-gateway:8090, crowdsourced-data-service:8091, rewards-service:8092)
+- authority-c (api-gateway:8100, data-service:8101, rewards-service:8102)
+- authority-d (Gateway:8110, CrowdsourcedDataService:8111, RewardsService:8112)
+
+**Note:** Some services may not be easily containerized (especially those with SQLite/MongoDB). Provide a hybrid approach:
+- Compose for what can be containerized
+- Scripts for services that need local file system access
+
+Update README with exact commands.
+
+**Alternative:** If Docker is not feasible, create robust `scripts/run-all.sh` that:
+- Starts services in correct order (databases first, then services, then gateways, then frontend)
+- Handles port conflicts by updating config files or using environment variables
+- Provides clear logging of which services started successfully
+
+**Gate:** A new machine can run the system with README steps. At minimum: `scripts/run-all.sh` works reliably.
+
+---
+
+## 6) Seed data for demos
+
+### 6.1 Add seed observations and points per authority
+
+**Autopilot prompt:**
+
+Add seed data to each authority so dashboards are not empty:
+
+**Authority-A:**
+- At least 10 observations with different postcodes and timestamps
+- At least 3 contributors with different points so leaderboard is meaningful
+- Seed via startup `@PostConstruct` method or data loader
+
+**Authority-B:**
+- Seed via startup data loader in crowdsourced-data-service
+- Ensure rewards-service has processed them to generate leaderboard data
+
+**Authority-C:**
+- Seed via Flyway migrations or startup data loader in data-service
+- Ensure rewards-service has processed them
+
+**Authority-D:**
+- Seed via MongoDB seed data loader in CrowdsourcedDataService
+- Ensure RewardsService has computed rewards
+
+Provide a `/dev/seed` endpoint or startup seeding (preferred for demo).
+
+Document demo users and sample credentials in README.
+
+**Gate:** Each dashboard shows non-empty recent list and leaderboard.
+
+---
+
+## 7) Quality gates (tests + lint + consistent style)
+
+### 7.1 Backend tests
+
+**Autopilot prompt:**
+
+Add minimal automated tests:
+- **auth-service:** register/login/change-password happy + failure cases
+- **authority services:** contract endpoint shape tests (at least smoke tests)
+
+Keep tests fast. Ensure they run via a single command per module.
+
+**Gate:** `mvn test` passes for Spring modules.
+
+### 7.2 Frontend lint/build
+
+**Autopilot prompt:**
+
+Add frontend quality checks:
+- ESLint + basic rules
+- `npm run build` succeeds
+- Ensure `.env.example` exists listing required `VITE_*` variables
+
+**Gate:** `npm run build` passes.
+
+---
+
+## 8) Evidence for "agile + teamwork" (required appendices)
+
+### 8.1 Project plan (Appendix 1)
+
+**Autopilot prompt:**
+
+Create `docs/project-plan.md` with:
+- 2–3 sprints
+- Backlog items mapped to owners (all 4 members + 5th placeholder)
+- Definition of done per sprint
+- Risk list and mitigation
+
+Format it so it can be pasted into the report appendix.
+
+**Gate:** Plan clearly assigns tasks to all 5 members.
+
+### 8.2 Logbook (Appendix 2)
+
+**Autopilot prompt:**
+
+Create `docs/logbook.md` as a table with columns:
+Date, Attendees, Agenda, Decisions, Tasks Assigned, Updates, Blockers, Next Steps.
+
+Add 6–10 realistic entries covering:
+- Planning session (monorepo structure, API contract)
+- Integration session (port conflicts, adapter implementation)
+- Testing session (end-to-end testing, bug fixes)
+- Demo rehearsal
+
+Keep entries consistent with what the repo actually contains.
+
+**Gate:** Logbook aligns with commits and work done.
+
+### 8.3 Peer assessment forms (Appendix 3)
+
+**Autopilot prompt:**
+
+Create `docs/peer-assessment-template.md`:
+- Includes criteria: skills, attendance, contribution, quality, respect, listening, consensus
+- Includes a signature section for all members
+- Includes a short contribution summary per member
+
+**Gate:** Template ready for printing/signing/scanning.
+
+---
+
+## 9) Demo script (20 minutes, everyone speaks)
+
+**Autopilot prompt:**
+
+Create `docs/demo-script.md` for a 20-minute demo:
+- 1 min: Architecture overview (monorepo structure, 4 authorities + auth + frontend)
+- 3 min: Auth flow (register/login/protected routes/change password)
+- 2 min: Hub navigation (showing 4 authority dashboards)
+- 10 min: Each member 2 min for their authority dashboard showing the three required blocks (count, recent, leaderboard)
+- 2 min: Error handling (stop one service and show graceful UI)
+- 2 min: Agile reflection talking points and challenges/resolutions
+
+Include exact clicks and URLs.
+
+**Gate:** You can rehearse demo once with no surprises.
+
+---
+
+## 10) Final packaging checklist (submission-ready)
+
+### 10.1 Build + zip
+
+**Autopilot prompt:**
+
+Create `scripts/package-submission.sh` that:
+- Builds auth-service (`mvn clean package`)
+- Builds frontend (`npm run build`)
+- Builds all authority services (where applicable)
+- Gathers required configs, README, and docs
+- Outputs a zip named `GroupSubmission.zip` containing the complete integrated application
+
+Also add `scripts/verify-submission.sh` that runs quick smoke checks:
+- Verifies all required files exist
+- Checks that build artifacts are present
+- Validates README structure
+
+**Gate:** Zip contains everything required and runs on a clean machine.
+
+---
+
+## Summary of Key Differences from Original Instructions
+
+1. **Port conflicts:** Multiple services use 8080/8081/8082. Instructions include a port mapping strategy.
+2. **Different architectures:**
+   - Authority-A: Monolithic
+   - Authority-B/C/D: Separate gateway + data + rewards services
+   - Authority-D: Uses MongoDB (others use SQLite)
+3. **Adapter layer required:** Each authority needs adapter endpoints to match the contract without modifying existing code.
+4. **No file modifications:** Instructions emphasize adding new adapter controllers, not modifying existing files.
+5. **4 authorities initially:** Authority-E is a placeholder to be added later.
+
+These instructions account for the actual structure and differences of the four microservices.

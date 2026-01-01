@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: crowdsourced-data-service
+          uri: http://localhost:8121
+          predicates:
+            - Path=/api/crowdsourced/**
+          filters:
+            - StripPrefix=2
+        - id: rewards-service
+          uri: http://localhost:8122
+          predicates:
+            - Path=/api/rewards/**
+          filters:
+            - StripPrefix=1
+
+server:
+  port: 8120
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
