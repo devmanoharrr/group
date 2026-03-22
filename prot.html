@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>User Study Prototype — Performance Variability</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(15, 23, 42, 0.2);
+        border-top-color: rgba(15, 23, 42, 0.9);
+        border-radius: 9999px;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen bg-slate-50 text-slate-900">
+    <header class="border-b bg-white">
+      <div class="mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="h-9 w-9 rounded-xl bg-slate-900"></div>
+          <div>
+            <div class="text-sm font-semibold leading-tight">Study Prototype</div>
+          </div>
+        </div>
+        <div class="text-right min-w-0 max-w-[min(100%,14rem)]">
+          <div class="text-xs text-slate-500">User ID · Condition</div>
+          <div class="text-sm font-semibold break-words">
+            <span id="uiParticipantId">—</span>
+            <span class="text-slate-400 font-normal">·</span>
+            <span id="uiCondition" class="uppercase tracking-wide text-slate-600">—</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-4xl px-4 py-8">
+      <section class="mb-6">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-sm font-semibold">Task progress</div>
+          <div class="text-xs text-slate-500"><span id="uiStepLabel">Step 0</span> of 8</div>
+        </div>
+        <div class="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
+          <div id="uiProgressBar" class="h-2 bg-slate-900 rounded-full transition-all" style="width: 0%"></div>
+        </div>
+      </section>
+
+      <div id="uiLoading" class="hidden mb-6 rounded-2xl border bg-white p-4 flex items-center gap-4">
+        <div class="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center">
+          <div class="spinner"></div>
+        </div>
+        <div class="flex-1">
+          <div class="text-sm font-semibold">Please wait…</div>
+          <div id="uiLoadingMsg" class="text-xs text-slate-500">Loading next step</div>
+        </div>
+      </div>
+
+      <section class="rounded-2xl border bg-white shadow-sm">
+        <div class="p-6 border-b flex items-start justify-between gap-4">
+          <div>
+            <h1 id="uiTitle" class="text-lg font-semibold">Welcome</h1>
+            <p id="uiSubtitle" class="text-sm text-slate-600 mt-1">Enter your user ID to begin.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btnRestart" class="hidden rounded-xl border px-3 py-2 text-sm font-semibold hover:bg-slate-50" onclick="doRestart()">Restart</button>
+            <button id="btnDownloadCsv" class="hidden rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800" onclick="downloadCsvClick()">Download CSV</button>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <!-- Step 0: User ID -->
+          <div class="step" data-step="0">
+            <div class="rounded-xl bg-slate-50 border p-4">
+              <div class="text-sm font-semibold">User ID</div>
+              <p class="text-sm text-slate-600 mt-1">Enter the user ID you were given. This will be included in your output file.</p>
+              <div class="mt-4">
+                <label class="text-xs font-semibold text-slate-600">Your user ID</label>
+                <input id="inpUserId" type="text" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" placeholder="e.g. U001" />
+              </div>
+              <div class="mt-4 flex justify-end">
+                <button type="button" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800" onclick="startProcess()">Start</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 1: Consent -->
+          <div class="step hidden" data-step="1">
+            <div class="rounded-xl bg-slate-50 border p-4">
+              <div class="text-sm font-semibold">Consent</div>
+              <p class="text-sm text-slate-600 mt-1">This prototype records anonymous interaction data (e.g., step timestamps, time taken, completion/exit). A separate Microsoft Forms questionnaire is linked after you download your log. No names or contact details are collected in this prototype.</p>
+              <label class="mt-4 flex items-start gap-3 cursor-pointer select-none">
+                <input id="consentCheckbox" type="checkbox" class="mt-1 h-4 w-4 rounded border-slate-300" onchange="consentCheckChanged()" />
+                <span class="text-sm text-slate-700">I confirm I am 18+ and I consent to take part.</span>
+              </label>
+              <div class="mt-4 flex items-center justify-end gap-2">
+                <button type="button" class="rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-slate-50" onclick="declineConsent()">Decline</button>
+                <button id="btnConsentContinue" type="button" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed" disabled onclick="acceptConsent()">Continue</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Package -->
+          <div class="step hidden" data-step="2">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="rounded-xl border p-4 hover:bg-slate-50 cursor-pointer option-card" data-value="Standard" onclick="pickPackage('Standard')">
+                <div class="text-sm font-semibold">Standard Package</div>
+                <div class="text-sm text-slate-600 mt-1">Basic option for the task.</div>
+              </div>
+              <div class="rounded-xl border p-4 hover:bg-slate-50 cursor-pointer option-card" data-value="Premium" onclick="pickPackage('Premium')">
+                <div class="text-sm font-semibold">Premium Package</div>
+                <div class="text-sm text-slate-600 mt-1">Includes extra features (simulated).</div>
+              </div>
+            </div>
+            <div class="mt-6 flex items-center justify-between">
+              <button type="button" class="btnBack rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-slate-50" onclick="goBack()">Back</button>
+              <button id="btnStep1Next" type="button" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed" disabled onclick="step1Next()">Next</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Date and time -->
+          <div class="step hidden" data-step="3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="text-xs font-semibold text-slate-600">Preferred date</label>
+                <input id="inpDate" type="date" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" onchange="step2DateChanged()" />
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-slate-600">Time slot</label>
+                <select id="inpTime" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" onchange="step2TimeChanged()">
+                  <option value="">Select…</option>
+                  <option value="10:00">10:00</option>
+                  <option value="12:00">12:00</option>
+                  <option value="14:00">14:00</option>
+                  <option value="16:00">16:00</option>
+                </select>
+              </div>
+            </div>
+            <div class="mt-6 flex items-center justify-between">
+              <button type="button" class="btnBack rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-slate-50" onclick="goBack()">Back</button>
+              <button id="btnStep2Next" type="button" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed" disabled onclick="step2Next()">Next</button>
+            </div>
+          </div>
+
+          <!-- Step 4: Delivery -->
+          <div class="step hidden" data-step="4">
+            <div>
+              <label class="text-xs font-semibold text-slate-600">How would you like to receive the service?</label>
+              <select id="inpDelivery" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" onchange="step3DeliveryChanged()">
+                <option value="">Select…</option>
+                <option value="Home delivery">Home delivery</option>
+                <option value="Collect in person">Collect in person</option>
+                <option value="Pick-up point">Pick-up point</option>
+              </select>
+            </div>
+            <div class="mt-6 flex items-center justify-between">
+              <button type="button" class="btnBack rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-slate-50" onclick="goBack()">Back</button>
+              <button type="button" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800" onclick="step3Next()">Next</button>
+            </div>
+          </div>
+
+          <!-- Step 5: Notes -->
+          <div class="step hidden" data-step="5">
+            <div>
+              <label class="text-xs font-semibold text-slate-600">Additional notes (optional)</label>
+              <textarea id="inpNotes" rows="4" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" placeholder="Any special requests or comments..."></textarea>
+            </div>
+            <div class="mt-6 flex items-center justify-between">
+              <button type="button" class="btnBack rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-slate-50" onclick="goBack()">Back</button>
+              <button type="button" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800" onclick="step5Next()">Next</button>
+            </div>
+          </div>
+
+          <!-- Step 6: Review -->
+          <div class="step hidden" data-step="6">
+            <div class="rounded-xl border bg-slate-50 p-4">
+              <div class="text-sm font-semibold">Review</div>
+              <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                <div class="rounded-xl bg-white border p-3">
+                  <div class="text-xs text-slate-500">Package</div>
+                  <div class="font-semibold" id="reviewPackage">—</div>
+                </div>
+                <div class="rounded-xl bg-white border p-3">
+                  <div class="text-xs text-slate-500">Date</div>
+                  <div class="font-semibold" id="reviewDate">—</div>
+                </div>
+                <div class="rounded-xl bg-white border p-3">
+                  <div class="text-xs text-slate-500">Time</div>
+                  <div class="font-semibold" id="reviewTime">—</div>
+                </div>
+                <div class="rounded-xl bg-white border p-3">
+                  <div class="text-xs text-slate-500">Delivery</div>
+                  <div class="font-semibold" id="reviewDelivery">—</div>
+                </div>
+                <div class="rounded-xl bg-white border p-3 md:col-span-2">
+                  <div class="text-xs text-slate-500">Notes</div>
+                  <div class="font-semibold" id="reviewNotes">—</div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-6 flex items-center justify-between">
+              <button type="button" class="btnBack rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-slate-50" onclick="goBack()">Back</button>
+              <button type="button" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800" onclick="step6Next()">Next</button>
+            </div>
+          </div>
+
+          <!-- Step 7: Confirm -->
+          <div class="step hidden" data-step="7">
+            <div class="rounded-xl border bg-slate-50 p-4">
+              <div class="text-sm font-semibold">Confirm your choices</div>
+              <p class="text-sm text-slate-600 mt-1">Please confirm to finish the task. You will then download your data and open the survey in Microsoft Forms.</p>
+            </div>
+            <div class="mt-6 flex items-center justify-between">
+              <button type="button" class="btnBack rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-slate-50" onclick="goBack()">Back</button>
+              <button type="button" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800" onclick="confirmTask()">Confirm & Finish Task</button>
+            </div>
+          </div>
+
+          <!-- Step 8: Download data + link to Microsoft Forms survey -->
+          <div class="step hidden" data-step="8">
+            <div class="rounded-xl border p-4">
+              <div class="text-sm font-semibold">Task complete</div>
+              <p class="text-sm text-slate-600 mt-1">Download your interaction log, then continue to the questionnaire in Microsoft Forms.</p>
+              <div class="mt-4">
+                <button type="button" id="btnDownloadData" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800" onclick="downloadTaskDataAndShowSurvey()">Download the data</button>
+              </div>
+              <div id="wrapAfterDownload" class="hidden mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm text-slate-600">Your file should have downloaded. Use the button below to open the survey.</p>
+                <a id="linkMsFormsSurvey" href="https://forms.office.com/Pages/ResponsePage.aspx?id=3c9X5zUfV0Svj3ycaxQ34-167Pn_jlxKgY8syGIafW9UM0xBRldNU1pRR1RQMzEwMjZWQUxNMTY4OC4u" target="_blank" rel="noopener noreferrer" class="mt-3 inline-flex rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Continue to survey</a>
+              </div>
+              <div class="mt-6 flex flex-wrap gap-2">
+                <button type="button" class="rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-slate-50" onclick="doRestart()">Restart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script>
+      function getTimeNow() {
+        return new Date().toISOString();
+      }
+
+      function stringifyMeta(obj) {
+        try {
+          return JSON.stringify(obj || {});
+        } catch (e) {
+          return "{}";
+        }
+      }
+
+      function makeParticipantId() {
+        var d = new Date();
+        var y = d.getFullYear().toString();
+        var m = String(d.getMonth() + 1);
+        if (m.length === 1) m = "0" + m;
+        var day = String(d.getDate());
+        if (day.length === 1) day = "0" + day;
+        var r = Math.random().toString(36).slice(2, 8).toUpperCase();
+        return "P-" + y + m + day + "-" + r;
+      }
+
+      function StudyLogger(storageKey) {
+        this.storageKey = storageKey || "study_logger_v1";
+        this.startedAt = Date.now();
+        this.state = {
+          user_id: null,
+          participant_id: null,
+          condition: null,
+          consented: false,
+          task: {},
+          survey: {},
+          events: [],
+        };
+      }
+
+      function getAssignedConditionFromUrl() {
+        try {
+          var q = new URLSearchParams(window.location.search || "");
+          var raw = (q.get("condition") || "").trim().toUpperCase();
+          if (raw === "FAST" || raw === "MEDIUM" || raw === "SLOW") return raw;
+          var b = (q.get("batch") || "").trim();
+          if (b === "1") return "FAST";
+          if (b === "2") return "SLOW";
+        } catch (e) {}
+        return null;
+      }
+
+      StudyLogger.prototype.initAfterUserId = function () {
+        var existing = localStorage.getItem(this.storageKey);
+        if (existing) {
+          try {
+            this.state = JSON.parse(existing);
+            if (!this.state.events) this.state.events = [];
+          } catch (e) {}
+        }
+        if (!this.state.participant_id) {
+          this.state.participant_id = makeParticipantId();
+        }
+        var forced = getAssignedConditionFromUrl();
+        if (forced) {
+          this.state.condition = forced;
+        } else if (!this.state.condition) {
+          this.state.condition = Math.random() < 0.5 ? "MEDIUM" : "SLOW";
+        }
+        var seenStart = false;
+        var ev = this.state.events || [];
+        var i;
+        for (i = 0; i < ev.length; i++) {
+          if (ev[i].event === "session_start") {
+            seenStart = true;
+            break;
+          }
+        }
+        if (!seenStart) {
+          this.logEvent("session_start", { step: 0 });
+        } else {
+          this.save();
+        }
+      };
+
+      StudyLogger.prototype.setUserId = function (id) {
+        this.state.user_id = (id || "").trim();
+        this.logEvent("user_id_entered", { step: 0 });
+        this.save();
+      };
+
+      StudyLogger.prototype.save = function () {
+        localStorage.setItem(this.storageKey, JSON.stringify(this.state));
+      };
+
+      StudyLogger.prototype.clearStorage = function () {
+        localStorage.removeItem(this.storageKey);
+      };
+
+      StudyLogger.prototype.setConsented = function (consented) {
+        this.state.consented = !!consented;
+        this.logEvent(consented ? "consent_accept" : "consent_decline", { step: 1 });
+        this.save();
+      };
+
+      StudyLogger.prototype.setTaskField = function (key, value) {
+        this.state.task[key] = value;
+        this.logEvent("task_input", { key: key, value: value });
+        this.save();
+      };
+
+      StudyLogger.prototype.logEvent = function (name, meta) {
+        var evt = {
+          user_id: this.state.user_id,
+          participant_id: this.state.participant_id,
+          condition: this.state.condition,
+          event: name,
+          step: meta && meta.step !== undefined ? meta.step : "",
+          timestamp_iso: getTimeNow(),
+          elapsed_ms: Date.now() - this.startedAt,
+          meta_json: stringifyMeta(meta),
+        };
+        this.state.events.push(evt);
+        this.save();
+        return evt;
+      };
+
+      StudyLogger.prototype.getCsvRows = function () {
+        var rows = [];
+        var i;
+        for (i = 0; i < this.state.events.length; i++) {
+          rows.push({
+            user_id: this.state.events[i].user_id != null ? this.state.events[i].user_id : this.state.user_id,
+            participant_id: this.state.events[i].participant_id,
+            condition: this.state.events[i].condition,
+            event: this.state.events[i].event,
+            step: this.state.events[i].step,
+            timestamp_iso: this.state.events[i].timestamp_iso,
+            elapsed_ms: this.state.events[i].elapsed_ms,
+            meta_json: this.state.events[i].meta_json,
+          });
+        }
+        rows.push({
+          user_id: this.state.user_id,
+          participant_id: this.state.participant_id,
+          condition: this.state.condition,
+          event: "snapshot",
+          step: "",
+          timestamp_iso: getTimeNow(),
+          elapsed_ms: Date.now() - this.startedAt,
+          meta_json: stringifyMeta({
+            consented: this.state.consented,
+            task: this.state.task,
+            survey: this.state.survey,
+          }),
+        });
+        return rows;
+      };
+
+      function escapeCsvVal(v) {
+        var s = String(v === null || v === undefined ? "" : v);
+        if (/[",\n]/.test(s)) {
+          return '"' + s.replace(/"/g, '""') + '"';
+        }
+        return s;
+      }
+
+      StudyLogger.prototype.downloadCsv = function (filenameBase) {
+        var rows = this.getCsvRows();
+        var headers = ["user_id", "participant_id", "condition", "event", "step", "timestamp_iso", "elapsed_ms", "meta_json"];
+        var lines = [];
+        lines.push(headers.join(","));
+        var i, j;
+        for (i = 0; i < rows.length; i++) {
+          var parts = [];
+          for (j = 0; j < headers.length; j++) {
+            parts.push(escapeCsvVal(rows[i][headers[j]]));
+          }
+          lines.push(parts.join(","));
+        }
+        var csv = lines.join("\n");
+        var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = (filenameBase || "study_log") + "_" + (this.state.user_id || "unknown") + "_" + this.state.condition + ".csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      };
+      var studyLogger = null;
+      var currentStep = 0;
+      var sessionEndEventLogged = false;
+      var taskState = {
+        selectedPackage: null,
+        date: null,
+        time: null,
+        delivery: null,
+        notes: null,
+      };
+
+      var BATCH_DELAYS = {
+        FAST: { min: 0, max: 500 },
+        MEDIUM: { min: 1500, max: 2500 },
+        SLOW: { min: 4000, max: 5000 },
+      };
+
+      /** Replace with your Microsoft Forms response URL (Share → Get link). */
+      var MS_FORMS_SURVEY_URL = "https://forms.office.com/";
+
+      function getDelay() {
+        var cond = studyLogger.state.condition;
+        var batch = BATCH_DELAYS[cond];
+        if (!batch) batch = BATCH_DELAYS.MEDIUM;
+        var range = batch.max - batch.min;
+        return batch.min + Math.floor(Math.random() * (range + 1));
+      }
+
+      function getEl(id) {
+        return document.getElementById(id);
+      }
+
+      function hideAllSteps() {
+        var steps = document.querySelectorAll(".step");
+        for (var i = 0; i < steps.length; i++) {
+          steps[i].classList.add("hidden");
+        }
+      }
+
+      function showStepDiv(stepNum) {
+        var stepEl = document.querySelector('.step[data-step="' + stepNum + '"]');
+        if (stepEl) {
+          stepEl.classList.remove("hidden");
+        }
+      }
+
+      function updateProgressBar() {
+        var bar = getEl("uiProgressBar");
+        var label = getEl("uiStepLabel");
+        if (!bar || !label) return;
+        var taskSteps = 6;
+        var stepForBar = currentStep >= 2 && currentStep <= 7 ? currentStep - 1 : 0;
+        if (currentStep > 7) stepForBar = taskSteps;
+        var pct = (stepForBar / taskSteps) * 100;
+        bar.style.width = pct + "%";
+        label.textContent = "Step " + Math.min(currentStep, 8) + " of 8";
+      }
+
+      function setTitles(step) {
+        var titles = {
+          0: { t: "Enter your ID", s: "Please enter your user ID to begin." },
+          1: { t: "Consent", s: "Please confirm you consent to take part." },
+          2: { t: "Step 1 — Choose a package", s: "Select one option to continue." },
+          3: { t: "Step 2 — Enter details", s: "Choose a date and time slot." },
+          4: { t: "Step 3 — Delivery", s: "How would you like to receive the service?" },
+          5: { t: "Step 4 — Additional notes", s: "Add any special requests (optional)." },
+          6: { t: "Step 5 — Review", s: "Confirm the details to complete the task." },
+          7: { t: "Step 6 — Confirm", s: "Confirm to finish the task." },
+          8: { t: "Download & survey", s: "Download your data, then open the Microsoft Forms questionnaire." },
+        };
+        var t = titles[step] || { t: "Study", s: "" };
+        var titleEl = getEl("uiTitle");
+        var subEl = getEl("uiSubtitle");
+        if (titleEl) titleEl.textContent = t.t;
+        if (subEl) subEl.textContent = t.s;
+      }
+
+      function showRestartAndDownload(step) {
+        var restartBtn = getEl("btnRestart");
+        var downloadBtn = getEl("btnDownloadCsv");
+        if (restartBtn) restartBtn.classList.toggle("hidden", step < 1);
+        if (downloadBtn) downloadBtn.classList.toggle("hidden", step < 8);
+      }
+
+      function goToStep(step) {
+        currentStep = step;
+        hideAllSteps();
+        showStepDiv(step);
+        updateProgressBar();
+        setTitles(step);
+        showRestartAndDownload(step);
+        if (step === 8) {
+          var wrap = getEl("wrapAfterDownload");
+          if (wrap) wrap.classList.add("hidden");
+          sessionEndEventLogged = false;
+        }
+        if (studyLogger) {
+          studyLogger.logEvent("step_view", { step: step });
+          refreshHeader();
+        }
+      }
+
+      function showLoading(show, msg) {
+        var el = getEl("uiLoading");
+        var msgEl = getEl("uiLoadingMsg");
+        if (msgEl) msgEl.textContent = msg || "Loading…";
+        if (el) {
+          if (show) el.classList.remove("hidden");
+          else el.classList.add("hidden");
+        }
+      }
+
+      function doAfterDelay(actionName, nextFn) {
+        var delay = getDelay();
+        showLoading(true, actionName + "…");
+        var start = Date.now();
+        studyLogger.logEvent("latency_start", { step: currentStep, delay_ms: delay, action: actionName });
+        setTimeout(function () {
+          showLoading(false);
+          studyLogger.logEvent("latency_end", { step: currentStep, action: actionName, actual_ms: Date.now() - start });
+          nextFn();
+        }, delay);
+      }
+
+      function refreshHeader() {
+        var pid = getEl("uiParticipantId");
+        var cond = getEl("uiCondition");
+        if (!studyLogger) {
+          if (pid) pid.textContent = "—";
+          if (cond) cond.textContent = getAssignedConditionFromUrl() || "—";
+          return;
+        }
+        if (pid) pid.textContent = studyLogger.state.user_id || studyLogger.state.participant_id || "—";
+        if (cond) cond.textContent = studyLogger.state.condition || "—";
+      }
+
+      function startProcess() {
+        var inp = getEl("inpUserId");
+        var uid = inp && inp.value ? inp.value.trim() : "";
+        if (!uid) {
+          alert("Please enter your user ID.");
+          return;
+        }
+        studyLogger = new StudyLogger("perf_variability_study_v1");
+        studyLogger.setUserId(uid);
+        studyLogger.initAfterUserId();
+        refreshHeader();
+        doAfterDelay("Loading", function () {
+          goToStep(1);
+        });
+      }
+
+      function consentCheckChanged() {
+        var check = getEl("consentCheckbox");
+        var btn = getEl("btnConsentContinue");
+        if (btn) btn.disabled = !(check && check.checked);
+      }
+
+      function declineConsent() {
+        studyLogger.setConsented(false);
+        studyLogger.logEvent("abandon", { step: 1, reason: "declined_consent" });
+        studyLogger.downloadCsv("study_log_declined");
+      }
+
+      function acceptConsent() {
+        studyLogger.setConsented(true);
+        doAfterDelay("Loading", function () {
+          goToStep(2);
+        });
+      }
+
+      function pickPackage(value) {
+        var cards = document.querySelectorAll(".option-card");
+        for (var i = 0; i < cards.length; i++) {
+          cards[i].classList.remove("ring-2", "ring-slate-300", "bg-slate-50");
+          if (cards[i].getAttribute("data-value") === value) {
+            cards[i].classList.add("ring-2", "ring-slate-300", "bg-slate-50");
+          }
+        }
+        taskState.selectedPackage = value;
+        studyLogger.setTaskField("selected_package", value);
+        studyLogger.logEvent("step1_select_package", { step: 2, value: value });
+        var btn = getEl("btnStep1Next");
+        if (btn) btn.disabled = false;
+      }
+
+      function step1Next() {
+        doAfterDelay("Saving selection", function () {
+          goToStep(3);
+        });
+      }
+
+      function step2DateChanged() {
+        var inp = getEl("inpDate");
+        taskState.date = inp ? inp.value : null;
+        studyLogger.setTaskField("date", taskState.date);
+        studyLogger.logEvent("step2_set_date", { step: 3, value: taskState.date });
+        step2Validate();
+      }
+
+      function step2TimeChanged() {
+        var inp = getEl("inpTime");
+        taskState.time = inp ? inp.value : null;
+        studyLogger.setTaskField("time", taskState.time);
+        studyLogger.logEvent("step2_set_time", { step: 3, value: taskState.time });
+        step2Validate();
+      }
+
+      function step2Validate() {
+        var ok = !!(taskState.date && taskState.time);
+        var btn = getEl("btnStep2Next");
+        if (btn) btn.disabled = !ok;
+      }
+
+      function step2Next() {
+        doAfterDelay("Saving details", function () {
+          goToStep(4);
+        });
+      }
+
+      function step3DeliveryChanged() {
+        var sel = getEl("inpDelivery");
+        taskState.delivery = sel ? sel.value : null;
+        studyLogger.setTaskField("delivery", taskState.delivery);
+        studyLogger.logEvent("step3_delivery", { step: 4, value: taskState.delivery });
+      }
+
+      function step3NotesChanged() {
+        var ta = getEl("inpNotes");
+        taskState.notes = ta ? ta.value.trim() : "";
+        studyLogger.setTaskField("notes", taskState.notes);
+      }
+
+      function step3Next() {
+        step3DeliveryChanged();
+        doAfterDelay("Saving options", function () {
+          goToStep(5);
+        });
+      }
+
+      function step5Next() {
+        step3NotesChanged();
+        updateReview();
+        doAfterDelay("Preparing review", function () {
+          goToStep(6);
+        });
+      }
+
+      function step6Next() {
+        doAfterDelay("Loading", function () {
+          goToStep(7);
+        });
+      }
+
+      function updateReview() {
+        setElText("reviewPackage", taskState.selectedPackage || "—");
+        setElText("reviewDate", taskState.date || "—");
+        setElText("reviewTime", taskState.time || "—");
+        setElText("reviewDelivery", taskState.delivery || "—");
+        setElText("reviewNotes", taskState.notes || "—");
+      }
+
+      function setElText(id, text) {
+        var el = getEl(id);
+        if (el) el.textContent = text;
+      }
+
+      function goBack() {
+        var prev = currentStep - 1;
+        if (prev < 0) prev = 0;
+        studyLogger.logEvent("nav_back", { step: currentStep, to_step: prev });
+        doAfterDelay("Going back", function () {
+          goToStep(prev);
+        });
+      }
+
+      function confirmTask() {
+        studyLogger.logEvent("task_confirm", { step: 7, payload: taskState });
+        doAfterDelay("Finalizing", function () {
+          studyLogger.logEvent("task_completed", { step: 7 });
+          goToStep(8);
+        });
+      }
+
+      function showSurveyLinkAfterDownload() {
+        var wrap = getEl("wrapAfterDownload");
+        var link = getEl("linkMsFormsSurvey");
+        if (link) link.href = MS_FORMS_SURVEY_URL;
+        if (wrap) wrap.classList.remove("hidden");
+      }
+
+      function logSessionEndOnce() {
+        if (!studyLogger || sessionEndEventLogged) return;
+        studyLogger.logEvent("session_end", { step: 8 });
+        sessionEndEventLogged = true;
+      }
+
+      function downloadTaskDataAndShowSurvey() {
+        if (!studyLogger) return;
+        studyLogger.logEvent("download_csv_click", { step: currentStep });
+        studyLogger.downloadCsv("study_log");
+        logSessionEndOnce();
+        showSurveyLinkAfterDownload();
+      }
+
+      function downloadCsvClick() {
+        if (!studyLogger) return;
+        studyLogger.logEvent("download_csv_click", { step: currentStep });
+        studyLogger.downloadCsv("study_log");
+        if (currentStep === 8) {
+          logSessionEndOnce();
+          showSurveyLinkAfterDownload();
+        }
+      }
+
+      function doRestart() {
+        studyLogger.logEvent("restart", { step: currentStep });
+        studyLogger.clearStorage();
+        location.reload();
+      }
+
+      function onBeforeUnload(ev) {
+        try {
+          if (studyLogger) {
+            studyLogger.logEvent("abandon", { step: currentStep, reason: "beforeunload" });
+            studyLogger.save();
+            if (currentStep > 0 && currentStep < 8) {
+              ev = ev || window.event;
+              if (ev) ev.returnValue = "If you leave or refresh, you will lose your progress. Are you sure?";
+              return "If you leave or refresh, you will lose your progress. Are you sure?";
+            }
+          }
+        } catch (e) {}
+      }
+
+      (function () {
+        var link = getEl("linkMsFormsSurvey");
+        if (link) link.href = MS_FORMS_SURVEY_URL;
+        goToStep(0);
+        refreshHeader();
+        var restartBtn = getEl("btnRestart");
+        var downloadBtn = getEl("btnDownloadCsv");
+        if (restartBtn) restartBtn.classList.add("hidden");
+        if (downloadBtn) downloadBtn.classList.add("hidden");
+      })();
+    </script>
+    <script>
+      window.onbeforeunload = function (e) {
+        onBeforeUnload(e);
+      };
+    </script>
+  </body>
+</html>
